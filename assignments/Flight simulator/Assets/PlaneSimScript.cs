@@ -1,86 +1,156 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-//using TMPro;
+using UnityEngine.UI;
+using TMPro;
 
 public class PlaneScript : MonoBehaviour
 {
-    // Remember to assign a value to this variable in the Unity editor!
-    // I.e. Drag the camera into the slot in the inspector when you select the plane.
     public GameObject cameraObject;
-
     public Terrain terrain; 
+    public TMP_Text scoreText;
+    public TMP_Text winText;
+    public TMP_Text loseText;
+    public TMP_Text timerText;
 
-    //public TMP_Text scoreText;
+    private int score = 0;
+    private const int totalCollectibles = 7;
+    private HashSet<Collider> collectedObjects = new HashSet<Collider>();
+    private string scorePrefix = "Score: ";
+    private string scoreSuffix = "";
+    public float gameTime = 100f;
 
-    public int score;
-
-    // These variables will control how the plane moves
-    float forwardSpeed = 12f;
+    float forwardSpeed = 35f;
     float xRotationSpeed = 90f;
-    float yRotationSpeed = 90f;
+    float yRotationSpeed = 70f;
     float zRotationSpeed = 90f; 
     float boostTime;
+    private float remainingTime;
+    private bool isGameActive = false;
 
-    // Start is called before the first frame update
     void Start()
     {
-        
+        ExtractCustomText();
+        UpdateScoreText();
+        winText.gameObject.SetActive(false);
+        loseText.gameObject.SetActive(false);
+        remainingTime = gameTime;
+        UpdateTimerText();
+        StartCoroutine(CountdownToStart());
     }
 
-    // Update is called once per frame
+    private IEnumerator CountdownToStart()
+    {
+        timerText.text = "Press any key to start!";
+        yield return new WaitUntil(() => Input.anyKeyDown);
+        isGameActive = true;
+        remainingTime = gameTime;
+    }
+
+    private void ExtractCustomText()
+    {
+        string initialText = scoreText.text;
+        int scoreIndex = initialText.IndexOf("0/7");
+        if (scoreIndex != -1)
+        {
+            scorePrefix = initialText.Substring(0, scoreIndex);
+            scoreSuffix = initialText.Substring(scoreIndex + 3);
+        }
+    }
+
     void Update()
     {
-        // Get directional input (up, down, left, right)
-        float hAxis = Input.GetAxis("Horizontal"); // -1 if left is pressed, 1 if right is pressed, 0 if neither
-        float vAxis = Input.GetAxis("Vertical"); // -1 if down is pressed, 1 if up is pressed, 0 if neither
+        if (!isGameActive || score >= totalCollectibles) 
+        {
+            return;
+        }
+
+        remainingTime -= Time.deltaTime;
+        UpdateTimerText();
+
+        if (remainingTime <= 0)
+        {
+            LoseGame();
+            return;
+        }
+
+        float hAxis = Input.GetAxis("Horizontal");
+        float vAxis = Input.GetAxis("Vertical");
 
         float pitchInput = Input.GetAxis("Vertical");
-        float yawInput = Input.GetKey(KeyCode.E) ? -1 : Input.GetKey(KeyCode.Q) ? 1 : 0;
-        float rollInput = Input.GetKey(KeyCode.D) ? -1 : Input.GetKey(KeyCode.A) ? 1 : 0;
+        float yawInput = Input.GetKey(KeyCode.D) ? 1 : Input.GetKey(KeyCode.A) ? -1 : 0;
+        float rollInput = Input.GetKey(KeyCode.E) ? -1 : Input.GetKey(KeyCode.Q) ? 1 : 0;
         
-        // Apply the rotation based on the inputs
         Vector3 amountToRotate = new Vector3(0,0,0);
         amountToRotate.x = vAxis * xRotationSpeed;
         amountToRotate.y = yawInput * yRotationSpeed;
         amountToRotate.z = rollInput * zRotationSpeed;
-        amountToRotate *= Time.deltaTime; // amountToRotate = amountToRotate * Time.deltaTime;
+        amountToRotate *= Time.deltaTime;
         transform.Rotate(amountToRotate, Space.Self);
 
-        //colliding with terrain 
-        /*
-        float terrainHeight = terrain.SampleHeight(transform.position);
-        if(terrainHeight > transform.position.y) {
-            forwardSpeed = 0; 
-        } */
-
-        // Make the plane move forward by adding the forward vector to the position.
         transform.position += transform.forward * forwardSpeed * Time.deltaTime;
 
-        // Position the camera
         Vector3 cameraPosition = transform.position;
-        cameraPosition += -transform.forward * 10f; // Negative forward points in the opposite direction as forward
-        cameraPosition += Vector3.up * 8f; // Vector3.up is (0,1,0)
+        cameraPosition += -transform.forward * 15f;
+        cameraPosition += Vector3.up * 5f;
         cameraObject.transform.position = cameraPosition;
-        // LookAt is a utility function that rotates a transform so that it looks at a point
         cameraObject.transform.LookAt(transform.position);
+
+        
     }
 
-
-    // Unity will tell the function below to run under the following conditions:
-    //  1. Two objects with colliders are colliding
-    //  2. At least one of the objects' colliders are marked as "Is Trigger"
-    //  3. At least one of the objects has a Rigidbody
     public void OnTriggerEnter(Collider other)
+{
+    // Check if the collided object is a collectable and not already collected
+    if (other.CompareTag("collectable") && !collectedObjects.Contains(other))
     {
-        // 'other' is the name of the collider that just collided with the object
-        // that this script is attached to (the plane).
-        // Check to see that it has the tag "collectable". Tags are assigned in the Unity editor.
-        if (other.CompareTag("collectable"))
+        collectedObjects.Add(other);  // Add it to the set of collected objects
+        score++;
+        UpdateScoreText();
+        Destroy(other.gameObject);
+
+        // Add 10 seconds to the timer
+        remainingTime += 10f;
+
+        if (score >= totalCollectibles)
         {
-            score++;
-            //scoreText.text = "Score " + score;
-            Destroy(other.gameObject);
+            WinGame();
         }
+    }
+    // If the object is not a collectable, trigger the lose condition
+    else if (!other.CompareTag("collectable"))
+    {
+        LoseGame();
+    }
+}
+
+
+    private void UpdateTimerText()
+    {
+        if (isGameActive)
+        {
+            timerText.text = $"Time: {Mathf.Ceil(remainingTime)}";
+        }
+    }
+
+    private void UpdateScoreText()
+    {
+        scoreText.text = $"{scorePrefix}{score}/{totalCollectibles}{scoreSuffix}";
+    }
+
+    private void WinGame()
+    {
+        isGameActive = false;
+        winText.gameObject.SetActive(true);
+        winText.text = "You Win!";
+        Time.timeScale = 0f;
+    }
+
+    private void LoseGame()
+    {
+        isGameActive = false;
+        loseText.gameObject.SetActive(true);
+        loseText.text = "You Lose!";
+        Time.timeScale = 0f;  
     }
 }
