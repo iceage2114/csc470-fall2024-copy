@@ -100,29 +100,27 @@ public class PlaneScript : MonoBehaviour
     }
 
     public void OnTriggerEnter(Collider other)
-{
-    // Check if the collided object is a collectable and not already collected
-    if (other.CompareTag("collectable") && !collectedObjects.Contains(other))
     {
-        collectedObjects.Add(other);  // Add it to the set of collected objects
-        score++;
-        UpdateScoreText();
-        Destroy(other.gameObject);
-
-        // Add 10 seconds to the timer
-        remainingTime += 10f;
-
-        if (score >= totalCollectibles)
+        
+        if (other.CompareTag("collectable") && !collectedObjects.Contains(other))
         {
-            WinGame();
+            collectedObjects.Add(other); 
+            score++;
+            UpdateScoreText();
+            Destroy(other.gameObject);
+
+            remainingTime += 10f;
+
+            if (score >= totalCollectibles)
+            {
+                WinGame();
+            }
+        }
+        else if (!other.CompareTag("collectable"))
+        {
+            LoseGame();
         }
     }
-    // If the object is not a collectable, trigger the lose condition
-    else if (!other.CompareTag("collectable"))
-    {
-        LoseGame();
-    }
-}
 
 
     private void UpdateTimerText()
