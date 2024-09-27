@@ -30,7 +30,7 @@ public class PlaneScript : MonoBehaviour
 
     void Start()
     {
-        ExtractCustomText();
+        ExtractText();
         UpdateScoreText();
         winText.gameObject.SetActive(false);
         loseText.gameObject.SetActive(false);
@@ -47,7 +47,7 @@ public class PlaneScript : MonoBehaviour
         remainingTime = gameTime;
     }
 
-    private void ExtractCustomText()
+    private void ExtractText()
     {
         string initialText = scoreText.text;
         int scoreIndex = initialText.IndexOf("0/7");
