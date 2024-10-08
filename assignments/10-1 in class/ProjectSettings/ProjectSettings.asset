@@ -4,7 +4,7 @@
 PlayerSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 26
-  productGUID: 26c9870aae2a242cc8d04ddfe880d403
+  productGUID: a8c48e9ef90934b999f9dcfe1b06a243
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
   AndroidEnableSustainedPerformanceMode: 0
@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: DefaultCompany
-  productName: 9-27 in class
+  productName: 10-1 in class
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -677,14 +677,14 @@ PlayerSettings:
   apiCompatibilityLevelPerPlatform: {}
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: 9-27 in class
+  metroPackageName: 10-1 in class
   metroPackageVersion: 
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
   metroCertificateIssuer: 
   metroCertificateNotAfter: 0000000000000000
-  metroApplicationDescription: 9-27 in class
+  metroApplicationDescription: 10-1 in class
   wsaImages: {}
   metroTileShortName: 
   metroTileShowName: 0
@@ -754,10 +754,10 @@ PlayerSettings:
   apiCompatibilityLevel: 6
   activeInputHandler: 0
   windowsGamepadBackendHint: 0
-  cloudProjectId: 2d60e225-226b-4fa7-aef9-fe4e33011c1c
+  cloudProjectId: 5be0bed9-97f0-43eb-880f-8e0447891d33
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: 9-27 in class
+  projectName: 10-1 in class
   organizationId: jonathanzhang2114
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
