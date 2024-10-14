@@ -8,17 +8,18 @@ public class GameManager : MonoBehaviour
     public GameObject cellPrefab;
     CellScript[,] grid;
     float spacing = 1f;
+    bool isAutoIterating = false; 
+    float autoIterationInterval = 2f; 
+    float lastIterationTime = 0f;
 
     public string[] activeSpeciesList = { "pink", "water", "fire", "honey", "goo" };
 
-    private struct Zone
-    {
+    private struct Zone {
         public int x, y;
         public string species;
     }
 
-    void Start()
-    {
+    void Start() {
         grid = new CellScript[50,50];
 
         Zone[] zones = new Zone[]
@@ -75,13 +76,33 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        List<Zone> emptyZones = zones.Where(z => z.species == null).ToList();
+        if (emptyZones.Count > 0)
+        {
+            Zone randomEmptyZone = emptyZones[Random.Range(0, emptyZones.Count)];
+            string randomSpecies = activeSpeciesList[Random.Range(0, activeSpeciesList.Length)];
+            
+            for (int x = randomEmptyZone.x; x < randomEmptyZone.x + 16; x++)
+            {
+                for (int y = randomEmptyZone.y; y < randomEmptyZone.y + 16; y++)
+                {
+                    grid[x,y].alive = (Random.value > 0.5f);
+                    grid[x,y].AssignSpecies(randomSpecies);
+                    grid[x,y].SetColor();
+                }
+            }
+        }
     }
 
 
-    void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.Space)) {
+    void Update() {
+        if (Input.GetKeyDown(KeyCode.Space)) {
+            ToggleAutoIteration();
+        }
+
+        if (isAutoIterating && Time.time - lastIterationTime >= autoIterationInterval) {
             Simulate();
+            lastIterationTime = Time.time;
         }
     }
 
@@ -104,11 +125,9 @@ public class GameManager : MonoBehaviour
                 } else if(!grid[x,y].alive && count == 3){ //reproduction
                     nextAlive[x,y] = true;
                     
-                    // Check if any neighbor is goo
                     if (neighborSpecies.Contains("goo")) {
                         nextSpecies[x,y].Add("goo");
                     } else {
-                        // Handle regular species hybridization
                         var distinctSpecies = neighborSpecies.Distinct().ToList();
                         if (distinctSpecies.Count > 2) {
                             nextSpecies[x,y].Add("goo");
@@ -160,8 +179,16 @@ public class GameManager : MonoBehaviour
         return (count, neighborSpecies);
     }
 
-    public int CountNeighbors(int xIndex, int yIndex)
-    {
+    public int CountNeighbors(int xIndex, int yIndex) {
         return CountNeighborsAndSpecies(xIndex, yIndex).count;
+    }
+
+    void ToggleAutoIteration() {
+        isAutoIterating = true;
+        if (isAutoIterating){
+            Debug.Log("Auto started.");
+            Simulate();
+            lastIterationTime = Time.time;
+        }
     }
 }
