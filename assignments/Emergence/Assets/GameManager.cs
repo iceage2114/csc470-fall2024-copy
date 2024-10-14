@@ -7,7 +7,7 @@ public class GameManager : MonoBehaviour
 {
     public GameObject cellPrefab;
     CellScript[,] grid;
-    float spacing = 1.1f;
+    float spacing = 1f;
 
     public string[] activeSpeciesList = { "pink", "water", "fire", "honey", "goo" };
 
@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         grid = new CellScript[50,50];
-        
+
         Zone[] zones = new Zone[]
         {
             new Zone { x = 17, y = 34, species = null }, // 12 o'clock
